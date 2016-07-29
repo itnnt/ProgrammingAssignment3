@@ -42,6 +42,7 @@ load_data<-function() {
 
 examing_data<-load_data()
 
+## Finding the best hospital in a state
 best <- function(state, outcome_name) {
     ## state: the 2-character abbreviated name of a state, for example: "TX", "MD", "BB", "NY" 
     ## outcome: an outcome name
