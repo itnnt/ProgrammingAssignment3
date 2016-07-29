@@ -20,22 +20,63 @@
 # outcome value is passed to best, the function should throw an error via the stop function with the exact
 # message "invalid outcome".
 
-outcome <- read.csv("ProgAssignment3-data/outcome-of-care-measures.csv", colClasses = "character")
-attach(outcome)
+load_data<-function() {
+    ## Read outcome data
+    outcome <- read.csv("ProgAssignment3-data/outcome-of-care-measures.csv", colClasses = "character")
+    ## select examing columns
+    examing_data <- outcome[,c(
+        'Hospital.Name',
+        'State',
+        'Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack',
+        'Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure',
+        'Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia')]
+    
+    ## rename columns
+    colnames(examing_data)<-c('Hospital.Name','State', 'Heart.Attack','Heart.Failure','Pneumonia')
+    ## covert digits to numeric
+    examing_data$Heart.Attack<-as.numeric(examing_data$Heart.Attack)
+    examing_data$Heart.Failure<-as.numeric(examing_data$Heart.Failure)
+    examing_data$Pneumonia<-as.numeric(examing_data$Pneumonia)
+    examing_data
+}
 
-filter_data <- (subset(outcome, State=='TX' & !is.na(Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack), select = c(Hospital.Name, Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack)))
-result <- subset(filter_data$Hospital.Name, filter_data$Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack == min(filter_data$Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack))
+examing_data<-load_data()
 
-
-
-best <- function(state, outcome) {
+best <- function(state, outcome_name) {
     ## state: the 2-character abbreviated name of a state, for example: "TX", "MD", "BB", "NY" 
     ## outcome: an outcome name
     
-    ## Read outcome data
+    
+    
+    ## outcome_name should not contain any space character
+    ## all characters will be replaced by period
+    outcome_name<-paste(strsplit(outcome_name,' ')[[1]], collapse = '.')
+    # print(outcome_name)
+    # print(colnames(examing_data))
+    # print(grepl(outcome_name, colnames(examing_data), ignore.case = T))
+    selected_column <-
+        (colnames(examing_data)[grepl(outcome_name, colnames(examing_data), ignore.case = T)])
+    if (length(selected_column) == 0) {
+        message("invalid outcome")
+        stop ("invalid outcome")
+    }
+    # print(C)
+    filter_data <-
+        (subset(
+            examing_data,
+            examing_data$State == state & !is.na(examing_data[,selected_column])
+        ))
+    if (nrow(filter_data) == 0) {
+        stop ("invalid state")
+    }
+    result <-
+        subset(
+            filter_data$Hospital.Name,
+            filter_data[,selected_column] == min(filter_data[,selected_column])
+        )
+    print(result)
     ## Check that state and outcome are valid
     ## Return hospital name in that state with lowest 30-day death
     ## rate
-    
-    
 }
+
